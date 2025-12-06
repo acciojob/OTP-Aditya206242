@@ -1,78 +1,89 @@
-//your JS code here. If required.
-const inputs = Array.from(document.querySelectorAll('.code'));
-inputs[index].focus();
-inputs[index].setSelectionRange(0, 0);
-}
+// OTP behavior: forward typing, backspace to previous, auto-select on focus, paste support
 
+document.addEventListener('DOMContentLoaded', () => {
+  const inputs = Array.from(document.querySelectorAll('.code'));
 
-inputs.forEach((input, idx) => {
-input.addEventListener('input', (e) => {
-const val = e.target.value || '';
-const digit = val.replace(/[^0-9]/g, '').slice(0, 1);
-e.target.value = digit;
+  if (inputs.length === 0) return;
 
+  // helper: focus index safely
+  const focusIndex = (idx) => {
+    if (idx >= 0 && idx < inputs.length) {
+      inputs[idx].focus();
+      // select existing content so new typing replaces it
+      inputs[idx].select();
+    }
+  };
 
-if (digit !== '') {
-if (idx + 1 < inputs.length) {
-focusAt(idx + 1);
-} else {
-e.target.blur();
-}
-}
+  // initial focus on first
+  focusIndex(0);
+
+  // handle paste: if user pastes full code, distribute into fields
+  inputs.forEach((input, idx) => {
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData('text');
+      // keep only digits
+      const digits = paste.replace(/\D/g, '').split('');
+      for (let i = 0; i < digits.length && (idx + i) < inputs.length; i++) {
+        inputs[idx + i].value = digits[i];
+      }
+      const nextPos = Math.min(inputs.length - 1, idx + digits.length);
+      focusIndex(nextPos);
+    });
+
+    // input event: when user types, move forward automatically
+    input.addEventListener('input', (e) => {
+      const val = e.target.value;
+      // keep only first digit and numeric
+      const digit = (val.match(/\d/) || [''])[0];
+      e.target.value = digit;
+      if (digit !== '') {
+        // move to next
+        const next = idx + 1;
+        if (next < inputs.length) focusIndex(next);
+      }
+    });
+
+    // keydown to handle backspace behavior and left/right arrow navigation
+    input.addEventListener('keydown', (e) => {
+      const key = e.key;
+
+      if (key === 'Backspace') {
+        // if current has a value, clear it and keep focus here
+        if (input.value !== '') {
+          input.value = '';
+          e.preventDefault();
+          return;
+        }
+        // otherwise move to previous and clear it
+        const prevIdx = idx - 1;
+        if (prevIdx >= 0) {
+          inputs[prevIdx].value = '';
+          focusIndex(prevIdx);
+          e.preventDefault();
+        }
+      } else if (key === 'ArrowLeft') {
+        if (idx > 0) {
+          focusIndex(idx - 1);
+          e.preventDefault();
+        }
+      } else if (key === 'ArrowRight') {
+        if (idx < inputs.length - 1) {
+          focusIndex(idx + 1);
+          e.preventDefault();
+        }
+      } else if (key === 'Enter') {
+        // optionally you may do something with final code
+        // e.g., collect value and submit
+      } else {
+        // allow numeric keys only; but we rely also on input filtering
+        // do nothing here (input event will sanitize)
+      }
+    });
+
+    // when focused, select to allow overwrite
+    input.addEventListener('focus', (e) => {
+      e.target.select();
+    });
+  });
 });
-
-
-input.addEventListener('keydown', (e) => {
-const key = e.key;
-
-
-if (key === 'Backspace') {
-if (input.value === '') {
-if (idx > 0) {
-e.preventDefault();
-inputs[idx - 1].value = '';
-focusAt(idx - 1);
-}
-}
-} else if (key === 'ArrowLeft') {
-if (idx > 0) {
-e.preventDefault();
-focusAt(idx - 1);
-}
-} else if (key === 'ArrowRight') {
-if (idx + 1 < inputs.length) {
-e.preventDefault();
-focusAt(idx + 1);
-}
-} else if (key === 'Enter') {
-e.preventDefault();
-}
-});
-
-
-input.addEventListener('paste', (e) => {
-e.preventDefault();
-const paste = (e.clipboardData || window.clipboardData).getData('text');
-const digits = paste.replace(/[^0-9]/g, '');
-if (!digits) return;
-
-
-for (let i = 0; i < digits.length && (idx + i) < inputs.length; i++) {
-inputs[idx + i].value = digits.charAt(i);
-}
-if ((idx + digits.length) < inputs.length) {
-focusAt(idx + digits.length);
-} else {
-inputs[inputs.length - 1].blur();
-}
-});
-
-
-input.addEventListener('focus', (e) => {
-e.target.select();
-});
-});
-
-
-// initial focus
-if (inputs.length > 0) inputs[0].focus();

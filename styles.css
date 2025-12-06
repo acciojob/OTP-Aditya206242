@@ -1,55 +1,69 @@
-/*  your css code here. If applicable */
-body {
-font-family: Arial, Helvetica, sans-serif;
-padding: 24px;
-color: #222;
+:root{
+  --gap: 16px;
+  --input-size: 64px;
+  --border: #ddd;
+  --accent: #333;
 }
 
+*{box-sizing:border-box;}
 
-.center {
-max-width: 520px;
-margin: 0 auto;
+body{
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--accent);
+  margin: 40px;
+  background: #fff;
 }
 
-
-#verification_heading {
-font-size: 28px;
-margin-bottom: 6px;
+.container{
+  max-width:760px;
+  margin:0 auto;
+  padding: 8px;
 }
 
-
-#verification_subtext {
-color: #555;
-margin-bottom: 18px;
+#verification_heading{
+  font-size: 36px;
+  margin-bottom: 8px;
 }
 
-
-.code-container {
-display: flex;
-gap: 10px;
-margin-top: 10px;
+#verification_subtext{
+  margin-bottom: 24px;
+  color: #555;
 }
 
-
-.code {
-width: 46px;
-height: 56px;
-text-align: center;
-font-size: 24px;
-line-height: 56px;
-border-radius: 6px;
-border: 1px solid #ccc;
-outline: none;
-box-shadow: none;
+.code-container{
+  display: flex;
+  gap: 14px;
+  align-items: center;
 }
 
-
-.code:focus {
-border-color: #2c7be5;
-box-shadow: 0 0 0 3px rgba(44,123,229,0.12);
+/* input boxes */
+.code{
+  width: var(--input-size);
+  height: var(--input-size);
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  font-size: 28px;
+  text-align: center;
+  outline: none;
+  background: #fff;
+  transition: border-color .12s, box-shadow .12s;
+  -moz-appearance: textfield;
 }
 
+/* remove number input spinner on some browsers */
+.code::-webkit-outer-spin-button,
+.code::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
-@media (max-width: 420px) {
-.code { width: 40px; height: 48px; font-size: 20px; }
+.code:focus{
+  border-color: #4f46e5;
+  box-shadow: 0 4px 14px rgba(79,70,229,0.12);
+}
+
+/* smaller screens */
+@media (max-width: 420px){
+  :root { --input-size: 48px; }
+  .code { font-size: 20px; }
 }
